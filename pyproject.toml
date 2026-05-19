@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "phy-fastplotlib"
+version = "0.1.0"
+description = "Remote Phy-like GUI with fastplotlib"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy",
+  "pyzmq",
+  "PyQt6",
+]
+
+[project.scripts]
+phy-remote-client = "phy_remote.client.app:main"
+phy-remote-server = "phy_remote.server.__main__:main"
+phy-raw-viewer-client = "phy_remote.raw_viewer.client:main"
+phy-raw-viewer-server = "phy_remote.raw_viewer.__main__:main"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["phy_remote*", "client*", "server*", "shared*", "raw_viewer*"]
+exclude = ["tests*"]
