@@ -13,6 +13,16 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_FILE="${PHY_LAUNCH_CONFIG:-${SCRIPT_DIR}/phy-launch.env}"
+
+if [[ -f "${CONFIG_FILE}" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  source "${CONFIG_FILE}"
+  set +a
+fi
+
 usage() {
   cat <<'EOF'
 Usage:
@@ -56,8 +66,6 @@ for arg in "$@"; do
   esac
 done
 set -- "${POSITIONAL[@]}"
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 CLUSTER_USER="${CLUSTER_USER:-${USER}}"
 LOGIN_NODE="${LOGIN_NODE:-login1.int.janelia.org}"

@@ -9,6 +9,49 @@ This repo is designed to:
 
 For most users, the only command you need is `./phy-launch.sh ...`.
 
+## 30-second quickstart
+
+If this is your first run, do this:
+
+```bash
+git clone <this-repo-url> phy-fastplotlib
+cd phy-fastplotlib
+chmod +x phy-launch.sh scripts/bootstrap_cluster.sh
+cp phy-launch.env.example phy-launch.env
+conda create -n phy-fastplotlib python=3.11 -y
+conda activate phy-fastplotlib
+python -m pip install -e .
+```
+
+Edit `phy-launch.env` **before running anything else**:
+- required: `CLUSTER_USER`, `REMOTE_PYTHON`
+- optional: `CLIENT_PYTHON`, `REMOTE_REPO_DIR`, `OUTPUT_DIR`
+
+Open it in an editor:
+
+```bash
+nano phy-launch.env
+```
+
+Do not leave placeholder values like `<your_cluster_username>`.
+
+Quick sanity check (should print your values, not placeholders):
+
+```bash
+grep -E '^(CLUSTER_USER|REMOTE_PYTHON|CLIENT_PYTHON|REMOTE_REPO_DIR|OUTPUT_DIR)=' phy-launch.env
+```
+
+Preflight check (safe, no job submission):
+
+```bash
+./phy-launch.sh --dry-run /path/to/output/<probe>/shank_<n>/
+```
+
+```bash
+./scripts/bootstrap_cluster.sh
+./phy-launch.sh /path/to/output/<probe>/shank_<n>/
+```
+
 ## First-time setup (one time only)
 
 ### 1) Clone and enter the repo
@@ -23,20 +66,57 @@ cd phy-fastplotlib
 ```bash
 chmod +x phy-launch.sh
 chmod +x scripts/setup.sh
+chmod +x scripts/bootstrap_cluster.sh
 ```
 
-### 3) Confirm local Python env exists
-
-The launcher defaults to your shell python:
-- first tries `python`, then `python3` from `PATH`
-
-If your path is different, set `CLIENT_PYTHON` when launching:
+### 2a) Create your launcher config file (recommended)
 
 ```bash
-CLIENT_PYTHON=/path/to/your/env/bin/python ./phy-launch.sh ...
+cp phy-launch.env.example phy-launch.env
 ```
 
-### 3a) Install the project (recommended)
+Edit `phy-launch.env` once with your cluster username and Python paths.
+`phy-launch.sh` loads this file automatically.
+
+### 3) Create and activate a local environment
+
+Choose one option:
+
+**Option A: conda (recommended)**
+
+```bash
+conda create -n phy-fastplotlib python=3.11 -y
+conda activate phy-fastplotlib
+```
+
+**Option B: venv**
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 4) Confirm local Python env is active
+
+`phy-launch.sh` needs a local Python to run the GUI client.
+
+Default behavior:
+- uses `CLIENT_PYTHON` if set,
+- otherwise tries `python`, then `python3` from your `PATH`.
+
+Recommended (set once in `phy-launch.env`):
+
+```bash
+CLIENT_PYTHON=/path/to/your/local/env/bin/python
+```
+
+Quick check:
+
+```bash
+"${CLIENT_PYTHON:-python}" --version
+```
+
+### 4a) Install the project (recommended)
 
 ```bash
 python -m pip install -e .
@@ -54,9 +134,9 @@ Optional one-shot setup (installs + checks SSH/cluster tools):
 ./scripts/setup.sh
 ```
 
-### 3b) Set cluster identity + remote python (recommended)
+### 4b) Set cluster identity + remote python (recommended)
 
-Set these once in your shell profile (`~/.zshrc` or `~/.bashrc`):
+You can set these either in `phy-launch.env` (preferred) or your shell profile (`~/.zshrc` / `~/.bashrc`):
 
 ```bash
 export CLUSTER_USER=<your_cluster_username>
@@ -66,7 +146,7 @@ export REMOTE_PYTHON=/groups/scicompsoft/home/<your_cluster_username>/miniconda3
 
 Then open a new terminal (or `source ~/.zshrc`).
 
-### 4) Confirm cluster access
+### 5) Confirm cluster access
 
 You need passwordless or normal SSH access to:
 - `<your_cluster_username>@login1.int.janelia.org`
@@ -76,6 +156,34 @@ Quick test:
 ```bash
 ssh <your_cluster_username>@login1.int.janelia.org "hostname"
 ```
+
+### 6) One-time cluster setup (required)
+
+`phy-launch.sh` starts the **server on the cluster**, so cluster-side dependencies must exist.
+
+Recommended (automated) option:
+
+```bash
+./scripts/bootstrap_cluster.sh
+```
+
+This will:
+- SSH to the cluster,
+- sync this repo to `REMOTE_REPO_DIR`,
+- create the remote conda env if needed,
+- install with `pip install -e .`,
+- verify required imports.
+
+Run once on the cluster:
+
+```bash
+conda activate phy
+cd /path/to/phy-fastplotlib
+python -m pip install -e .
+python -c "import phy_remote, phylib, zmq, numpy; print('cluster ok')"
+```
+
+Then set `REMOTE_PYTHON` in your local shell to that cluster python path.
 
 ## Fastest way to run (recommended)
 
