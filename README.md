@@ -14,7 +14,7 @@ For most users, the only command you need is `./phy-launch.sh ...`.
 If this is your first run, do this:
 
 ```bash
-git clone <this-repo-url> phy-fastplotlib
+git clone https://github.com/joannercsheppard/phy-fastplotlib.git phy-fastplotlib
 cd phy-fastplotlib
 chmod +x phy-launch.sh scripts/bootstrap_cluster.sh
 cp phy-launch.env.example phy-launch.env
