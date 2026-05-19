@@ -199,8 +199,3 @@ Or if installed with `pip install -e .`:
 phy-remote-client --port 5557
 ```
 
-## Notes for labmates
-
-- You do **not** pass dataset path to the client command.
-- Dataset is chosen when the server starts (`params.py` path).
-- If server discovers multiple datasets, use the dataset/shank dropdown in the GUI status bar.
